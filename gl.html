@@ -272,7 +272,11 @@
             particle.vel.y = -particle.vel.y;
         }
 
-        setVertices(vertices, index, particle.pos.x, particle.pos.y, particle.width, particle.height);
+        setVertices(
+            vertices, index,
+            particle.pos.x, particle.pos.y,
+            particle.width, particle.height
+        );
     }
 
     // ------------------------------------------------------------
