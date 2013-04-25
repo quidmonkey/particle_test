@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style type="text/css">
+    #fps {
+        float: left;
+    }
+    #canvas {
+        border: 1px solid black;
+        margin: auto;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
+</style>
+
+<script type="text/javascript" src="dat.gui.min.js"></script>
+
+<script type="text/javascript">
+
+    var ENTITY_SPEED = 200;
+    var TOTAL_PARTICLES = 1000;
+
+    var canvas;
+    var ctx;
+
+    var particles = [];
+    var image;
+    var imageSrc = 'media/particle.png';
+
+    var fps = 1 / 60;
+    var fpsDiv;
+
+    var globalTime = Date.now();
+    var tick;
+
+    window.onload = init;
+
+    function Particle (image, x, y, width, height) {
+        this.image = image;
+        this.pos = {
+            x: x,
+            y: y
+        };
+        this.vel = {
+            x: Math.random() * ENTITY_SPEED - ENTITY_SPEED / 2,
+            y: Math.random() * ENTITY_SPEED - ENTITY_SPEED / 2
+        };
+        this.height = height;
+        this.width = width;
+    }
+
+    function init () {
+        image = new Image();
+        image.onload = main;
+        image.src = imageSrc;
+
+        var gui = new dat.GUI();
+        gui.add(window, 'TOTAL_PARTICLES', 0, 20000);
+    }
+
+    function main () {
+        fpsDiv = document.getElementById('fps');
+
+        canvas = document.getElementById('canvas');
+        ctx = canvas.getContext('2d');
+
+        spawnParticles(TOTAL_PARTICLES);
+
+        fillBrowser(canvas);
+        step();
+    }
+
+    function checkParticleCount () {
+        if (particles.length < TOTAL_PARTICLES) {
+            spawnParticles(~~TOTAL_PARTICLES - particles.length);
+        } else if (particles.length > TOTAL_PARTICLES) {
+            particles.length = ~~TOTAL_PARTICLES;
+        }
+    }
+
+    function clearCanvas () {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function fillBrowser (canvas) {
+        var dWidth = window.innerWidth / canvas.width;
+        var dHeight = window.innerHeight / canvas.height;
+        var newWidth;
+        var newHeight;
+
+        if (dWidth < dHeight) {
+            newWidth = dWidth * canvas.width;
+            newHeight = dWidth * canvas.height;
+        } else {
+            newWidth = dHeight * canvas.width;
+            newHeight = dHeight * canvas.height;
+        }
+
+        canvas.style.width = newWidth + 'px';
+        canvas.style.height = newHeight + 'px';
+    }
+
+    function setFPS (el, fps) {
+        el.textContent = 'FPS: ' + Math.round(1000 / fps).toString();
+    }
+
+    function spawnParticles (count) {
+        for (var i = 0; i < count; i++) {
+            particles.push(new Particle(
+                image,
+                Math.random() * (canvas.width - image.width),
+                Math.random() * (canvas.height - image.height),
+                image.width,
+                image.height
+            ));
+        }
+    }
+
+    function step () {
+        webkitRequestAnimationFrame(step, canvas);
+
+        var current = Date.now();
+        tick = (current - globalTime) / 1000;
+        fps = fps * 0.8 + (current - globalTime) * 0.2;
+        globalTime = current;
+
+        setFPS(fpsDiv, fps);
+
+        checkParticleCount();
+
+        clearCanvas();
+
+        for (var i = 0, len = particles.length; i < len; i++) {
+            var particle = particles[i];
+            update(particle);
+            render(particle);
+        }
+    }
+
+    function render (particle) {
+        ctx.drawImage(particle.image, ~~particle.pos.x, ~~particle.pos.y);
+    }
+
+    function update (particle) {
+        particle.pos.x += particle.vel.x * tick;
+        particle.pos.y += particle.vel.y * tick;
+
+        if (particle.pos.x + particle.width < 0 || particle.pos.x > canvas.width) {
+            particle.vel.x = -particle.vel.x;
+        }
+
+        if (particle.pos.y + particle.height < 0 || particle.pos.y > canvas.height) {
+            particle.vel.y = -particle.vel.y;
+        }
+    }
+
+</script>
+<body>
+    <div id="fps"></div>
+    <canvas id="canvas" width="500" height="500"></canvas>
+</body>
+
+</html>

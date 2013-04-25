@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style type="text/css">
+    #fps {
+        float: left;
+    }
+    #canvas {
+        border: 1px solid black;
+        margin: auto;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
+</style>
+
+<script type="text/javascript" src="dat.gui.min.js"></script>
+
+<script type="text/javascript">
+
+    var BYTES_PER_FLOAT = 4;
+    var ENTITY_SPEED = 200;
+    var FLOATS_PER_VERT = 2;
+    var QUADS_PER_BUFFER = 2;
+    var TOTAL_PARTICLES = 1000;
+    var VERTS_PER_QUAD = 6;
+
+    var canvas;
+    var gl;
+    var program;
+    var textureShader;
+    var vertexShader;
+
+    var particles = [];
+    var image;
+    var imageSrc = 'media/particle.png';
+
+    var fps = 1 / 60;
+    var fpsDiv;
+
+    var globalTime = Date.now();
+    var tick;
+
+    var textureLocation
+    var verticesLocation;
+    var resolutionLocation;
+
+    var buffer;
+
+    var texture;
+    var vertices;
+
+    window.onload = init;
+
+    function Particle (image, x, y, width, height) {
+        this.image = image;
+        this.pos = {
+            x: x,
+            y: y
+        };
+        this.vel = {
+            x: Math.random() * ENTITY_SPEED - ENTITY_SPEED / 2,
+            y: Math.random() * ENTITY_SPEED - ENTITY_SPEED / 2
+        };
+        this.height = height;
+        this.width = width;
+    }
+
+    function init () {
+        image = new Image();
+        image.onload = main;
+        image.src = imageSrc;
+
+        var gui = new dat.GUI();
+        gui.add(window, 'TOTAL_PARTICLES', 0, 150000);
+    }
+
+    function main () {
+        fpsDiv = document.getElementById('fps');
+        canvas = document.getElementById('canvas');
+        fillBrowser(canvas);
+
+        try {
+            gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        } catch(e) {}
+
+        if (!gl) {
+            throw '*** ERROR: WebGL Unsupported ***';
+        }
+
+        // shaders
+        textureShader = createShader(gl, '2d-fragment-shader');
+        vertexShader = createShader(gl, '2d-vertex-shader');
+
+        // gl program
+        program = createProgram(gl, [textureShader, vertexShader], ['a_UVs', 'a_vertices']);
+        gl.useProgram(program);
+
+        // blending
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        gl.enable(gl.BLEND);
+
+        // attributes
+        textureLocation = gl.getAttribLocation(program, 'a_UVs');
+        verticesLocation = gl.getAttribLocation(program, 'a_vertices');
+
+        gl.enableVertexAttribArray(textureLocation);
+        gl.enableVertexAttribArray(verticesLocation);
+
+        // uniforms
+        resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+        setResolution(canvas.width, canvas.height);
+
+        // create gl buffer
+        buffer = gl.createBuffer();
+
+        // upload particle image
+        texture = createTexture(gl, image);
+
+        // create vertices array
+        vertices = getCoordsBuffer(TOTAL_PARTICLES);
+
+        // create particles
+        spawnParticles(TOTAL_PARTICLES);
+        initUVs();
+
+        step();
+    }
+
+    // interleave vertices & uvs
+    function bufferData (gl, buffer, coords, textureLocation, verticesLocation) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.vertexAttribPointer(textureLocation, FLOATS_PER_VERT, gl.FLOAT, false, 16, 8);
+        gl.vertexAttribPointer(verticesLocation, FLOATS_PER_VERT, gl.FLOAT, false, 16, 0)
+        gl.bufferData(gl.ARRAY_BUFFER, coords, gl.DYNAMIC_DRAW);
+    }
+
+    function checkParticleCount (particleCount) {
+        if (particles.length < particleCount) {
+            spawnParticles(particleCount - particles.length);
+            vertices = getCoordsBuffer(particleCount);
+        } else if (particles.length > particleCount) {
+            particles.length = particleCount;
+            vertices = getCoordsBuffer(particleCount);
+        }
+        initUVs();
+    }
+
+    function fillBrowser (canvas) {
+        var dWidth = window.innerWidth / canvas.width;
+        var dHeight = window.innerHeight / canvas.height;
+        var newWidth;
+        var newHeight;
+
+        if (dWidth < dHeight) {
+            newWidth = dWidth * canvas.width;
+            newHeight = dWidth * canvas.height;
+        } else {
+            newWidth = dHeight * canvas.width;
+            newHeight = dHeight * canvas.height;
+        }
+
+        canvas.style.width = newWidth + 'px';
+        canvas.style.height = newHeight + 'px';
+    }
+
+    function getCoordsBuffer (quadCount) {
+        return new Float32Array(VERTS_PER_QUAD * FLOATS_PER_VERT * QUADS_PER_BUFFER * quadCount);
+    }
+
+    function initUVs () {
+        for (var i = 0, len = particles.length; i < len; i++) {
+            setUVs(vertices, i);
+        }
+    }
+
+    function render () {
+        bufferData(gl, buffer, vertices, textureLocation, verticesLocation);
+        gl.drawArrays(gl.TRIANGLES, 0, particles.length * VERTS_PER_QUAD);
+    }
+
+    function spawnParticles (count) {
+        var startIndex = particles.length;
+        for (var i = 0; i < count; i++) {
+            particles.push(new Particle(
+                image,
+                Math.random() * (canvas.width - image.width),
+                Math.random() * (canvas.height - image.height),
+                image.width,
+                image.height
+            ));
+        }
+    }
+
+    function step () {
+        webkitRequestAnimationFrame(step, canvas);
+
+        var current = Date.now();
+        tick = (current - globalTime) / 1000;
+        fps = fps * 0.8 + (current - globalTime) * 0.2;
+        globalTime = current;
+
+        setFPS(fpsDiv, fps);
+
+        checkParticleCount(~~TOTAL_PARTICLES);
+
+        for (var i = 0, len = particles.length; i < len; i++) {
+            update(i, particles[i]);
+        }
+
+        render();
+    }
+
+    function setResolution (width, height) {
+        gl.uniform2f(resolutionLocation, width, height);
+    }
+
+    function setFPS (el, fps) {
+        el.textContent = 'FPS: ' + Math.round(1000 / fps).toString();
+    }
+
+    function setUVs (coords, index) {
+        var i = index * VERTS_PER_QUAD * FLOATS_PER_VERT * QUADS_PER_BUFFER;
+
+        coords[i+2] = 0.0;
+        coords[i+3] = 0.0;
+        coords[i+6] = 1.0;
+        coords[i+7] = 0.0;
+        coords[i+10] = 0.0;
+        coords[i+11] = 1.0;
+        coords[i+14] = 0.0;
+        coords[i+15] = 1.0;
+        coords[i+18] = 1.0;
+        coords[i+19] = 0.0;
+        coords[i+22] = 1.0;
+        coords[i+23] = 1.0;
+    }
+
+    function setVertices (coords, index, x, y, width, height) {
+        var i = index * VERTS_PER_QUAD * FLOATS_PER_VERT * QUADS_PER_BUFFER;
+        var left = x;
+        var right = left + width;
+        var top = y;
+        var bottom = top + height;
+
+        coords[i] = left;
+        coords[i+1] = top;
+        coords[i+4] = right;
+        coords[i+5] = top;
+        coords[i+8] = left;
+        coords[i+9] = bottom;
+        coords[i+12] = left;
+        coords[i+13] = bottom;
+        coords[i+16] = right;
+        coords[i+17] = top;
+        coords[i+20] = right;
+        coords[i+21] = bottom;
+    }
+
+    function update (index, particle) {
+        particle.pos.x += particle.vel.x * tick;
+        particle.pos.y += particle.vel.y * tick;
+
+        if (particle.pos.x + particle.width < 0 || particle.pos.x > canvas.width) {
+            particle.vel.x = -particle.vel.x;
+        }
+
+        if (particle.pos.y + particle.height < 0 || particle.pos.y > canvas.height) {
+            particle.vel.y = -particle.vel.y;
+        }
+
+        setVertices(vertices, index, particle.pos.x, particle.pos.y, particle.width, particle.height);
+    }
+
+    // ------------------------------------------------------------
+    // gl boilerplate
+
+    function createTexture (gl, image, register) {
+        var texture = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE0 + (register || 0));
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        // gl.bindTexture(gl.TEXTURE_2D, null);
+        return texture;
+    }
+
+    function createProgram (gl, shaders, attributes, locations) {
+        var program = gl.createProgram();
+        var i, len;
+
+        for (i = 0, len = shaders.length; i < len; i++) {
+            gl.attachShader(program, shaders[i]);
+        }
+
+        if (attributes) {
+            for (i = 0, len = attributes.length; i < len; i++) {
+                gl.bindAttribLocation(
+                    program,
+                    locations ? locations[i] : i,
+                    attributes[i]
+                );
+            }
+        }
+        gl.linkProgram(program);
+
+        // Check the link status
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            // something went wrong with the link
+            gl.deleteProgram(program);
+            return console.error('*** Error in program linking:' + gl.getProgramInfoLog (program) + '***');
+        }
+        return program;
+    }
+
+
+    function createShader (gl, id) {
+        // grab script
+        var script = document.getElementById(id);
+        if (!script) {
+            throw('*** Error: unknown script element ' + id + ' ***');
+        }
+        var source = script.text;
+
+        // define type
+        var type;
+        if (script.type === 'x-shader/x-vertex') {
+            type = gl.VERTEX_SHADER;
+        } else if (script.type === 'x-shader/x-fragment') {
+            type = gl.FRAGMENT_SHADER;
+        } else {w('*** Error: unknown shader type ***');
+            return null;
+        }
+
+        return this.loadShader(gl, source, type);
+    }
+
+    function loadShader (gl, source, type) {
+        // create shader
+        var shader = gl.createShader(type);
+
+        // load source
+        gl.shaderSource(shader, source);
+
+        // compile shader
+        gl.compileShader(shader);
+
+        // error?
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            gl.deleteShader(shader);
+            console.log('Shader Source: ', source);
+            return console.error('*** Error compiling shader "' + type + '":' + gl.getShaderInfoLog(shader) + ' ***');
+        }
+
+        return shader;
+    }
+
+</script>
+
+<script id="2d-vertex-shader" type="x-shader/x-vertex">
+    attribute vec2 a_UVs;
+    attribute vec2 a_vertices;
+
+    uniform vec2 u_resolution;
+
+    varying vec2 v_UVs;
+
+    void main () {
+        // normalize and convert to clip space (range of -1 to 1)
+        vec2 clipSpace = a_vertices / u_resolution * 2.0 - 1.0;
+
+        // invert y-axis
+        gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+
+        v_UVs = a_UVs;
+    }
+</script>
+
+<script id="2d-fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+
+    uniform sampler2D u_image;
+
+    varying vec2 v_UVs;
+
+    void main () {
+        gl_FragColor = texture2D(u_image, v_UVs);
+    }
+</script>
+
+</head>
+
+<body>
+    <div id="fps"></div>
+    <canvas id="canvas" width="500" height="500"></canvas>
+</body>
+
+</html>
