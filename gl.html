@@ -20,6 +20,16 @@
 <script type="text/javascript" src="dat.gui.min.js"></script>
 
 <script type="text/javascript">
+    // requestAnimationFrame polyfill
+    window.requestAnimFrame =
+    window.requestAnimationFrame       ||
+    window.webkitRequestAnimationFrame ||
+    window.mozRequestAnimationFrame    ||
+    window.oRequestAnimationFrame      ||
+    window.msRequestAnimationFrame     ||
+    function(callback) {
+        window.setTimeout(callback, 1000 / 60);
+    };
 
     var BYTES_PER_FLOAT = 4;
     var ENTITY_SPEED = 200;
@@ -196,7 +206,7 @@
     }
 
     function step () {
-        webkitRequestAnimationFrame(step, canvas);
+        requestAnimFrame(step, canvas);
 
         var current = Date.now();
         tick = (current - globalTime) / 1000;
