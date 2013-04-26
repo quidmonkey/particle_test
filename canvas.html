@@ -82,9 +82,9 @@
         }
     }
 
-    function clearCanvas () {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    function clearCanvas (context) {
+        context.fillStyle = '#FFFFFF';
+        context.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     function fillBrowser (canvas) {
@@ -133,7 +133,7 @@
 
         checkParticleCount();
 
-        clearCanvas();
+        clearCanvas(ctx);
 
         for (var i = 0, len = particles.length; i < len; i++) {
             var particle = particles[i];
