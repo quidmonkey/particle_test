@@ -111,8 +111,8 @@
             newHeight = dHeight * canvas.height;
         }
 
-        canvas.style.width = newWidth + 'px';
-        canvas.style.height = newHeight + 'px';
+        canvas.style.width = ~~newWidth + 'px';
+        canvas.style.height = ~~newHeight + 'px';
     }
 
     function setFPS (el, fps) {
@@ -160,11 +160,11 @@
         particle.pos.x += particle.vel.x * tick;
         particle.pos.y += particle.vel.y * tick;
 
-        if (particle.pos.x + particle.width < 0 || particle.pos.x > canvas.width) {
+        if (particle.pos.x < 0 || particle.pos.x + particle.width > canvas.width) {
             particle.vel.x = -particle.vel.x;
         }
 
-        if (particle.pos.y + particle.height < 0 || particle.pos.y > canvas.height) {
+        if (particle.pos.y < 0 || particle.pos.y + particle.height > canvas.height) {
             particle.vel.y = -particle.vel.y;
         }
     }
