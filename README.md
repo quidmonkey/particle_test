@@ -1,4 +1,4 @@
-# ImpactJS vs. Canvas vs. WebGL Particle Test
+## ImpactJS vs. Canvas vs. WebGL Particle Test
 
 This is a particle-based performance test comparing the [ImpactJS](http://impactjs.com/) game engine, 2D Canvas and WebGL.
 
@@ -15,7 +15,7 @@ Both the ImpactJS tests require a copy of the ImpactJS game engine. The Canvas a
 
 The ImpactJS and the 2D Canvas performance tests make of use the canvas element's 2d context, but where ImpactJS wraps rendering in the trappings of a game engine, the 2D Canvas test seeks to render to the canvas directly.
 
-One of the goals of this test was to highlight the performance of the current ImpactJS implementation. ImpactJS makes use of John Resig's [Classical Object-Oriented](http://ejohn.org/blog/simple-javascript-inheritance/) Implementation, which involves the use of closures to simulate inheritance. Unfortunately, such an elegant solution is not without its tradeoffs. When combined with Impact's heavy function use, the result is a significant performance hit.
+One of the goals of this test was to highlight the performance of the current ImpactJS implementation. ImpactJS makes use of John Resig's [Classical Object-Oriented Implementation](http://ejohn.org/blog/simple-javascript-inheritance/), which involves the use of closures to simulate inheritance. Unfortunately, such an elegant solution is not without its tradeoffs. When combined with Impact's heavy function use, the result is a significant performance hit.
 
 It should be noted that comparing a game engine to an optimized particle renderer is like comparing apples and oranges. To that extent, a faster ImpactJS test is included. This implementation seeks to route around some of the more time-consuming aspects of ImpactJS (collision detection, background map logic, etc.) as well as offer up some examples on how to get more performance from the game engine.
 
