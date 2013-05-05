@@ -18,6 +18,7 @@
 </style>
 
 <script type="text/javascript" src="dat.gui.min.js"></script>
+<script type="text/javascript" src="fpsmeter.min.js"></script>
 
 <script type="text/javascript">
     // requestAnimationFrame polyfill
@@ -48,8 +49,7 @@
     var image;
     var imageSrc = 'media/particle.png';
 
-    var fps = 1 / 60;
-    var fpsDiv;
+    var fps;
 
     var globalTime = Date.now();
     var tick;
@@ -83,6 +83,8 @@
         image = new Image();
         image.onload = main;
         image.src = imageSrc;
+
+        fps = new FPSMeter(document.body, { theme: 'dark', heat: 1, graph: 1 });
 
         var gui = new dat.GUI();
         gui.add(window, 'TOTAL_PARTICLES', 0, 200000);
@@ -210,10 +212,7 @@
 
         var current = Date.now();
         tick = (current - globalTime) / 1000;
-        fps = fps * 0.8 + (current - globalTime) * 0.2;
         globalTime = current;
-
-        setFPS(fpsDiv, fps);
 
         checkParticleCount(~~TOTAL_PARTICLES);
 
@@ -222,14 +221,12 @@
         }
 
         render();
+
+        fps.tick();
     }
 
     function setResolution (width, height) {
         gl.uniform2f(resolutionLocation, width, height);
-    }
-
-    function setFPS (el, fps) {
-        el.textContent = 'FPS: ' + Math.round(1000 / fps).toString();
     }
 
     function setUVs (coords, index) {

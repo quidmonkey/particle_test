@@ -25,4 +25,4 @@ Special thanks to [Amadeus Demarzi](https://github.com/amadeus) for his help wit
 
 ## Errata
 
-All tests make use of [Dat GUI](https://code.google.com/p/dat-gui/) for changing particle count on-the-fly.
+All tests make use of [Dat GUI](https://code.google.com/p/dat-gui/) for changing particle count on-the-fly and [FPS Meter](http://darsa.in/fpsmeter/) for tracking frames-per-second.
