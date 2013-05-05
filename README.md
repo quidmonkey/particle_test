@@ -7,7 +7,7 @@ The test features 4 HTML files:
 - impact.html - ImpactJS Test - [Live Example](http://ninjaspankypants.com/particle_test/impact.html)
 - impact-fast.html - ImpactJS Test Using a Faster Implementation - [Live Example](http://ninjaspankypants.com/particle_test/impact-fast.html)
 - canvas.html - 2D Canvas Test - [Live Example](http://ninjaspankypants.com/particle_test/canvas.html)
-- webgl.html - WebGL Test - [Live Example](http://ninjaspankypants.com/particle_test/gl.html)
+- webgl.html - WebGL Test - [Live Example](http://ninjaspankypants.com/particle_test/webgl.html)
 
 Both the ImpactJS tests require a copy of the ImpactJS game engine. The Canvas and WebGL tests are standalone files.
 
