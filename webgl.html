@@ -33,7 +33,7 @@
     };
 
     var BYTES_PER_FLOAT = 4;
-    var ENTITY_SPEED = 200;
+    var PARTICLE_SPEED = 200;
     var FLOATS_PER_VERT = 2;
     var QUADS_PER_BUFFER = 2;
     var TOTAL_PARTICLES = 1000;
@@ -72,8 +72,8 @@
             y: y
         };
         this.vel = {
-            x: Math.random() * ENTITY_SPEED - ENTITY_SPEED / 2,
-            y: Math.random() * ENTITY_SPEED - ENTITY_SPEED / 2
+            x: Math.random() * PARTICLE_SPEED - PARTICLE_SPEED / 2,
+            y: Math.random() * PARTICLE_SPEED - PARTICLE_SPEED / 2
         };
         this.height = height;
         this.width = width;

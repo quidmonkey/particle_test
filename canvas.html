@@ -32,7 +32,7 @@
         window.setTimeout(callback, 1000 / 60);
     };
 
-    var ENTITY_SPEED = 200;
+    var PARTICLE_SPEED = 200;
     var TOTAL_PARTICLES = 1000;
 
     var canvas;
@@ -56,8 +56,8 @@
             y: y
         };
         this.vel = {
-            x: Math.random() * ENTITY_SPEED - ENTITY_SPEED / 2,
-            y: Math.random() * ENTITY_SPEED - ENTITY_SPEED / 2
+            x: Math.random() * PARTICLE_SPEED - PARTICLE_SPEED / 2,
+            y: Math.random() * PARTICLE_SPEED - PARTICLE_SPEED / 2
         };
         this.height = height;
         this.width = width;
