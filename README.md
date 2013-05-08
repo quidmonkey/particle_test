@@ -21,7 +21,7 @@ One of the goals of this test was to highlight the performance of the current Im
 
 It should be noted that comparing a game engine to an optimized particle renderer is like comparing apples and oranges. To that extent, a faster ImpactJS test is included. This implementation seeks to route around some of the more time-consuming aspects of ImpactJS (collision detection, background map logic, etc.) as well as offer up some examples on how to get more performance from the game engine.
 
-You are encouraged to compare the implementation of both the standard ImpactJS particle implementation and the optimized one; in particular, [particle.js](lib/game/entities/particle.js) vs. [particle-fast.js](lib/game/entities/particle-fast.js) and [main.js](lib/game/main.js) vs. [main-fast.js](lib/game/main-fast.js). Both the *-fast.js files are heavily commented to highlight their differences.
+You are encouraged to compare the implementation of both the standard ImpactJS particle implementation and the optimized one; in particular, [particle.js](lib/game/entities/particle.js) vs. [particle-fast.js](lib/game/entities/particle-fast.js) and [particles.js](lib/game/particles.js) vs. [particles-fast.js](lib/game/particles-fast.js). Both the *-fast.js files are heavily commented to highlight their differences.
 
 Special thanks to [Amadeus Demarzi](https://github.com/amadeus) for his help with the impact-fast implementation. The optimizations are as much his as they are mine.
 
