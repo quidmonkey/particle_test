@@ -26,10 +26,17 @@
     <script type="text/javascript" src="fpsmeter.min.js"></script>
 
     <script type="text/javascript" src="lib/impact/impact.js"></script>
-    <script type="text/javascript" src="lib/game/main-fast.js"></script>
+    <script type="text/javascript" src="lib/game/main.js"></script>
+
+    <script type="text/javascript">
+        window.onload = main;
+        function main () {
+            ig.main('#canvas', ParticleTestFast, 60, 500, 500, 1);
+        }
+    </script>
+
 </head>
 <body>
-    <div id="fps"></div>
     <canvas id="canvas"></canvas>
 </body>
 </html>

@@ -3,3 +3,10 @@ lib/impact
 lib/impact/*
 lib/weltmeister
 lib/weltmeister/*
+tools
+tools/*
+Makefile
+Gruntfile
+node_modules
+node_modules/*
+package.json
