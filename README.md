@@ -11,6 +11,8 @@ The test features 4 HTML files:
 
 Both the ImpactJS tests require a copy of the ImpactJS game engine. The Canvas and WebGL tests are standalone files.
 
+It is recommended that you adjust the slider in the upper right-hand corner until you reach 30 FPS and compare particle counts among the tests.
+
 ## ImpactJS
 
 The ImpactJS and the 2D Canvas performance tests make of use the canvas element's 2d context, but where ImpactJS wraps rendering in the trappings of a game engine, the 2D Canvas test seeks to render to the canvas directly.
