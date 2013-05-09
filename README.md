@@ -1,4 +1,4 @@
-## ImpactJS vs. Canvas vs. WebGL Particle Test
+## ImpactJS vs. Canvas vs. WebGL vs. PixiJS Particle Test
 
 This is a particle-based performance test comparing the [ImpactJS](http://impactjs.com/) game engine, 2D Canvas, WebGL and [PixiJS](https://github.com/GoodBoyDigital/pixi.js).
 
@@ -28,7 +28,7 @@ Special thanks to [Amadeus Demarzi](https://github.com/amadeus) for his help wit
 
 ## PixiJS
 
-
+While PixiJS can't match a native WebGL implementation, it does quite well. Unfortunately, it appears PixiJS implements a great deal of pre-processing in order to properly batch GL calls. Be aware that manipulating the particle count will incur some downtime while Pixi preps for batching.
 
 ## Errata
 
