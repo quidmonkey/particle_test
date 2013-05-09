@@ -1,13 +1,14 @@
 ## ImpactJS vs. Canvas vs. WebGL Particle Test
 
-This is a particle-based performance test comparing the [ImpactJS](http://impactjs.com/) game engine, 2D Canvas and WebGL.
+This is a particle-based performance test comparing the [ImpactJS](http://impactjs.com/) game engine, 2D Canvas, WebGL and [PixiJS](https://github.com/GoodBoyDigital/pixi.js).
 
-The test features 4 HTML files:
+The test features 5 HTML files:
 
 - impact.html - ImpactJS Test - [Live Example](http://ninjaspankypants.com/particle_test/impact.html)
 - impact-fast.html - ImpactJS Test Using a Faster Implementation - [Live Example](http://ninjaspankypants.com/particle_test/impact-fast.html)
 - canvas.html - 2D Canvas Test - [Live Example](http://ninjaspankypants.com/particle_test/canvas.html)
 - webgl.html - WebGL Test - [Live Example](http://ninjaspankypants.com/particle_test/webgl.html)
+- pixi.html - PixiJS Test - [Live Example](http://ninjaspankypants.com/particle_test/pixi.html)
 
 Both the ImpactJS tests require a copy of the ImpactJS game engine. The Canvas and WebGL tests are standalone files.
 
@@ -24,6 +25,10 @@ It should be noted that comparing a game engine to an optimized particle rendere
 You are encouraged to compare the implementation of both the standard ImpactJS particle implementation and the optimized one; in particular, [particle.js](lib/game/entities/particle.js) vs. [particle-fast.js](lib/game/entities/particle-fast.js) and [particles.js](lib/game/particles.js) vs. [particles-fast.js](lib/game/particles-fast.js). Both the *-fast.js files are heavily commented to highlight their differences.
 
 Special thanks to [Amadeus Demarzi](https://github.com/amadeus) for his help with the impact-fast implementation. The optimizations are as much his as they are mine.
+
+## PixiJS
+
+
 
 ## Errata
 
