@@ -6,7 +6,5 @@ lib/weltmeister/*
 tools
 tools/*
 Makefile
-Gruntfile
 node_modules
 node_modules/*
-package.json

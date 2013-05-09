@@ -1,0 +1,18 @@
+{
+  "name": "particles",                  // project name
+  "excludesFile": "excludes",           // files to exclude when deploying
+  "htmlFiles": [                        // html files which load the game
+    "impact.html",
+    "impact-fast.html"
+  ],
+  "server": "ninjaspankypants.com",     // deploy server (must have ssh setup)
+  "user": "quidmonkey",                 // deploy server username
+  "targetDir": "ninjaspankypants.com",  // working directory for deploy server
+  "version": "0.1.0",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-shell": "~0.2.2",
+    "shelljs": "~0.1.3"
+  }
+}
