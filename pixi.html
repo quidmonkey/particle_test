@@ -3,7 +3,7 @@
 
 <head>
 <style type="text/css">
-    #canvas {
+    canvas {
         border: 1px solid black;
         margin: auto;
         position: absolute;
@@ -11,11 +11,13 @@
         right: 0;
         top: 0;
         bottom: 0;
+        z-index: -1;
     }
 </style>
 
 <script type="text/javascript" src="dat.gui.min.js"></script>
 <script type="text/javascript" src="fpsmeter.min.js"></script>
+<script type="text/javascript" src="pixi.js"></script>
 
 <script type="text/javascript">
     // requestAnimationFrame polyfill
@@ -32,52 +34,33 @@
     var PARTICLE_SPEED = 200;
     var TOTAL_PARTICLES = 1000;
 
-    var canvas;
-    var ctx;
-
-    var particles = [];
-    var image;
-    var imageSrc = 'media/particle.png';
-
     var fps;
+    var imageSrc = 'media/particle.png';
+    var particles;
+    var particleTexture = PIXI.Texture.fromImage(imageSrc);
+    var renderer = new PIXI.WebGLRenderer(500, 500);
+    var stage = new PIXI.Stage;
 
     var globalTime = Date.now();
     var tick;
 
     window.onload = init;
 
-    function Particle (image, x, y, width, height) {
-        this.image = image;
-        this.pos = {
-            x: x,
-            y: y
-        };
-        this.vel = {
-            x: Math.random() * PARTICLE_SPEED - PARTICLE_SPEED / 2,
-            y: Math.random() * PARTICLE_SPEED - PARTICLE_SPEED / 2
-        };
-        this.height = height;
-        this.width = width;
-    }
-
     function init () {
-        image = new Image();
-        image.onload = main;
-        image.src = imageSrc;
-
         fps = new FPSMeter(document.body, { theme: 'dark', heat: 1, graph: 1 });
 
         var gui = new dat.GUI();
-        gui.add(window, 'TOTAL_PARTICLES', 0, 20000);
-    }
+        gui.add(window, 'TOTAL_PARTICLES', 0, 80000);
 
-    function main () {
-        canvas = document.getElementById('canvas');
-        ctx = canvas.getContext('2d');
+        document.body.appendChild(renderer.view);
+        fillBrowser(renderer.view);
+
+        stage.setBackgroundColor(-1);   // white
 
         spawnParticles(TOTAL_PARTICLES);
 
-        fillBrowser(canvas);
+        particles = stage.children;
+
         step();
     }
 
@@ -85,13 +68,19 @@
         if (particles.length < TOTAL_PARTICLES) {
             spawnParticles(~~TOTAL_PARTICLES - particles.length);
         } else if (particles.length > TOTAL_PARTICLES) {
-            particles.length = ~~TOTAL_PARTICLES;
+            removeParticles();
         }
     }
 
-    function clearCanvas (context) {
-        context.fillStyle = '#FFFFFF';
-        context.fillRect(0, 0, canvas.width, canvas.height);
+    function createParticle (texture) {
+        var p = new PIXI.Sprite(texture);
+        p.position.x = Math.random() * (renderer.view.width - texture.width);
+        p.position.y = Math.random() * (renderer.view.height - texture.height);
+        p.vel = {
+            x: Math.random() * PARTICLE_SPEED - PARTICLE_SPEED / 2,
+            y: Math.random() * PARTICLE_SPEED - PARTICLE_SPEED / 2
+        };
+        return p;
     }
 
     function fillBrowser (canvas) {
@@ -112,20 +101,21 @@
         canvas.style.height = ~~newHeight + 'px';
     }
 
-    function spawnParticles (count) {
-        for (var i = 0; i < count; i++) {
-            particles.push(new Particle(
-                image,
-                Math.random() * (canvas.width - image.width),
-                Math.random() * (canvas.height - image.height),
-                image.width,
-                image.height
-            ));
+    function removeParticles () {
+        for (var i = particles.length - 1; i > TOTAL_PARTICLES; i--) {
+            stage.removeChild(particles[i]);
         }
     }
 
-    function step () {
-        requestAnimFrame(step, canvas);
+    function spawnParticles (count) {
+        for (var i = 0; i < count; i++) {
+            var p = createParticle(particleTexture);
+            stage.addChild(p);
+        }
+    }
+
+    function step() {
+        requestAnimFrame(step, renderer.view);
 
         var current = Date.now();
         tick = (current - globalTime) / 1000;
@@ -133,37 +123,30 @@
 
         checkParticleCount();
 
-        clearCanvas(ctx);
-
-        for (var i = 0, len = particles.length; i < len; i++) {
-            var particle = particles[i];
-            update(particle);
-            render(particle);
+        for (var i = 0, len = ~~TOTAL_PARTICLES; i < len; i++) {
+            update(particles[i]);
         }
+
+        renderer.render(stage);
 
         fps.tick();
     }
 
-    function render (particle) {
-        ctx.drawImage(particle.image, ~~particle.pos.x, ~~particle.pos.y);
-    }
-
     function update (particle) {
-        particle.pos.x += particle.vel.x * tick;
-        particle.pos.y += particle.vel.y * tick;
+        particle.position.x += particle.vel.x * tick;
+        particle.position.y += particle.vel.y * tick;
 
-        if (particle.pos.x < 0 || particle.pos.x + particle.width > canvas.width) {
+        if (particle.position.x < 0 || particle.position.x + particle.width > renderer.view.width) {
             particle.vel.x = -particle.vel.x;
         }
 
-        if (particle.pos.y < 0 || particle.pos.y + particle.height > canvas.height) {
+        if (particle.position.y < 0 || particle.position.y + particle.height > renderer.view.height) {
             particle.vel.y = -particle.vel.y;
         }
     }
 
 </script>
+</head>
 <body>
-    <canvas id="canvas" width="500" height="500"></canvas>
 </body>
-
 </html>
