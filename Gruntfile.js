@@ -19,7 +19,7 @@ module.exports = function(grunt) {
       },
       // deploy to a remote server
       deploy: {
-        command: 'rsync -avz --exclude-from "<%= pkg.excludesFile %>" $PWD <%= pkg.user %>@<%= pkg.server %>:<%= pkg.targetDir %>',
+        command: 'rsync -avz --exclude-from "<%= pkg.excludesFile %>" $PWD <%= pkg.deployUser %>@<%= pkg.deployServer %>:<%= pkg.deployDir %>',
         options: {
           stdout: true
         }

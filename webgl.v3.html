@@ -33,12 +33,9 @@
         window.setTimeout(callback, 1000 / 60);
     };
 
-    var BYTES_PER_FLOAT = 4;
-    var FLOATS_PER_VERT = 2;
     var PARTICLE_SPEED = 200;
-    var QUADS_PER_BUFFER = 2;
+    var FLOATS_PER_VERT = 4;    // x, y, vx, vy
     var TOTAL_PARTICLES = 1000;
-    var VERTS_PER_QUAD = 6;
 
     var canvas;
     var gl;
@@ -46,21 +43,18 @@
     var textureShader;
     var vertexShader;
 
-    var particles = [];
+    var fps;
     var image;
     var imageSrc = 'media/particle.png';
+    var particles = [];
+    var startTime;
 
-    var fps;
-
-    var globalTime = Date.now();
-    var tick;
-
+    var pointSizeLocation;
     var resolutionLocation;
-    var textureLocation
+    var timeLocation;
     var verticesLocation;
 
     var buffer;
-
     var texture;
     var vertices;
 
@@ -88,7 +82,7 @@
         fps = new FPSMeter(document.body, { theme: 'dark', heat: 1, graph: 1 });
 
         var gui = new dat.GUI();
-        gui.add(window, 'TOTAL_PARTICLES', 0, 200000);
+        gui.add(window, 'TOTAL_PARTICLES', 0, 2000000);
     }
 
     function main () {
@@ -108,7 +102,7 @@
         vertexShader = createShader(gl, '2d-vertex-shader');
 
         // gl program
-        program = createProgram(gl, [textureShader, vertexShader], ['a_UVs', 'a_vertices']);
+        program = createProgram(gl, [textureShader, vertexShader], ['a_vertices']);
         gl.useProgram(program);
 
         // blending
@@ -116,14 +110,15 @@
         gl.enable(gl.BLEND);
 
         // attributes
-        textureLocation = gl.getAttribLocation(program, 'a_UVs');
         verticesLocation = gl.getAttribLocation(program, 'a_vertices');
-
-        gl.enableVertexAttribArray(textureLocation);
         gl.enableVertexAttribArray(verticesLocation);
 
         // uniforms
+        pointSizeLocation = gl.getUniformLocation(program, 'u_pointSize');
         resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+        timeLocation = gl.getUniformLocation(program, 'u_time');
+
+        setPointSize(image.width);
         setResolution(canvas.width, canvas.height);
 
         // create gl buffer
@@ -137,16 +132,15 @@
 
         // create particles
         spawnParticles(TOTAL_PARTICLES);
-        initUVs();
 
+        // here we go!
+        startTime = Date.now();
         step();
     }
 
-    // interleave vertices & uvs
-    function bufferData (gl, buffer, coords, textureLocation, verticesLocation) {
+    function bufferData (gl, buffer, coords, verticesLocation) {
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.vertexAttribPointer(textureLocation, FLOATS_PER_VERT, gl.FLOAT, false, 16, 8);
-        gl.vertexAttribPointer(verticesLocation, FLOATS_PER_VERT, gl.FLOAT, false, 16, 0)
+        gl.vertexAttribPointer(verticesLocation, FLOATS_PER_VERT, gl.FLOAT, false, 0, 0);
         gl.bufferData(gl.ARRAY_BUFFER, coords, gl.DYNAMIC_DRAW);
     }
 
@@ -158,7 +152,8 @@
             particles.length = particleCount;
             vertices = getCoordsBuffer(particleCount);
         }
-        initUVs();
+        fillVertices(vertices, particles);
+        bufferData(gl, buffer, vertices, verticesLocation);
     }
 
     function fillBrowser (canvas) {
@@ -179,61 +174,38 @@
         canvas.style.height = ~~newHeight + 'px';
     }
 
-    function getCoordsBuffer (quadCount) {
-        return new Float32Array(VERTS_PER_QUAD * FLOATS_PER_VERT * QUADS_PER_BUFFER * quadCount);
-    }
-
-    function initUVs () {
+    function fillVertices(coords, particles) {
         for (var i = 0, len = particles.length; i < len; i++) {
-            setUVs(vertices, i);
+            setVertex(coords, i, particles[i]);
         }
     }
 
+    function getCoordsBuffer (quadCount) {
+        return new Float32Array(FLOATS_PER_VERT * quadCount);
+    }
+
     function render () {
-        bufferData(gl, buffer, vertices, textureLocation, verticesLocation);
-        gl.drawArrays(gl.TRIANGLES, 0, particles.length * VERTS_PER_QUAD);
+        gl.drawArrays(gl.POINTS, 0, particles.length);
+    }
+
+    function setTime (time) {
+        gl.uniform1f(timeLocation, time);
+    }
+
+    function setPointSize (size) {
+        gl.uniform1f(pointSizeLocation, size);
     }
 
     function setResolution (width, height) {
         gl.uniform2f(resolutionLocation, width, height);
     }
 
-    function setUVs (coords, index) {
-        var i = index * VERTS_PER_QUAD * FLOATS_PER_VERT * QUADS_PER_BUFFER;
-
-        coords[i+2] = 0.0;
-        coords[i+3] = 0.0;
-        coords[i+6] = 1.0;
-        coords[i+7] = 0.0;
-        coords[i+10] = 0.0;
-        coords[i+11] = 1.0;
-        coords[i+14] = 0.0;
-        coords[i+15] = 1.0;
-        coords[i+18] = 1.0;
-        coords[i+19] = 0.0;
-        coords[i+22] = 1.0;
-        coords[i+23] = 1.0;
-    }
-
-    function setVertices (coords, index, x, y, width, height) {
-        var i = index * VERTS_PER_QUAD * FLOATS_PER_VERT * QUADS_PER_BUFFER;
-        var left = x;
-        var right = left + width;
-        var top = y;
-        var bottom = top + height;
-
-        coords[i] = left;
-        coords[i+1] = top;
-        coords[i+4] = right;
-        coords[i+5] = top;
-        coords[i+8] = left;
-        coords[i+9] = bottom;
-        coords[i+12] = left;
-        coords[i+13] = bottom;
-        coords[i+16] = right;
-        coords[i+17] = top;
-        coords[i+20] = right;
-        coords[i+21] = bottom;
+    function setVertex (coords, index, particle) {
+        var i = index * FLOATS_PER_VERT;
+        coords[i] = particle.pos.x;
+        coords[i+1] = particle.pos.y;
+        coords[i+2] = particle.vel.x;
+        coords[i+3] = particle.vel.y;
     }
 
     function spawnParticles (count) {
@@ -252,38 +224,13 @@
     function step () {
         requestAnimFrame(step, canvas);
 
-        var current = Date.now();
-        tick = (current - globalTime) / 1000;
-        globalTime = current;
-
         checkParticleCount(~~TOTAL_PARTICLES);
 
-        for (var i = 0, len = particles.length; i < len; i++) {
-            update(i, particles[i]);
-        }
+        setTime((Date.now() - startTime) / 1000);
 
         render();
 
         fps.tick();
-    }
-
-    function update (index, particle) {
-        particle.pos.x += particle.vel.x * tick;
-        particle.pos.y += particle.vel.y * tick;
-
-        if (particle.pos.x < 0 || particle.pos.x + particle.width > canvas.width) {
-            particle.vel.x = -particle.vel.x;
-        }
-
-        if (particle.pos.y < 0 || particle.pos.y + particle.height > canvas.height) {
-            particle.vel.y = -particle.vel.y;
-        }
-
-        setVertices(
-            vertices, index,
-            particle.pos.x, particle.pos.y,
-            particle.width, particle.height
-        );
     }
 
     // ------------------------------------------------------------
@@ -375,21 +322,42 @@
 </script>
 
 <script id="2d-vertex-shader" type="x-shader/x-vertex">
-    attribute vec2 a_UVs;
-    attribute vec2 a_vertices;
+    attribute vec4 a_vertices;
 
+    uniform float u_pointSize;
+    uniform float u_time;
     uniform vec2 u_resolution;
 
-    varying vec2 v_UVs;
+    // convert to clip space (normalized range of -1 to 1)
+    vec2 clip (vec2 vertex) {
+        return vertex / u_resolution * 2.0 - 1.0;
+    }
+
+    // extrapolate position over time
+    float extrapolate (float delta, float max) {
+        float bounces = floor(delta / max);
+        // how many bounces?
+        if (mod(bounces, 2.0) == 1.0) {
+            return max - mod(delta, max);
+        } else {
+            return mod(delta, max);
+        }
+    }
 
     void main () {
-        // normalize and convert to clip space (range of -1 to 1)
-        vec2 clipSpace = a_vertices / u_resolution * 2.0 - 1.0;
+        // integrate!
+        vec2 delta = a_vertices.zw * u_time + a_vertices.xy;
+
+        float x = extrapolate(delta.x, u_resolution.x);
+        float y = extrapolate(delta.y, u_resolution.y);
+
+        vec2 clipSpace = clip(vec2(x, y));
 
         // invert y-axis
         gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
 
-        v_UVs = a_UVs;
+        // set particle size!
+        gl_PointSize = u_pointSize;
     }
 </script>
 
@@ -398,10 +366,8 @@
 
     uniform sampler2D u_image;
 
-    varying vec2 v_UVs;
-
     void main () {
-        gl_FragColor = texture2D(u_image, v_UVs);
+        gl_FragColor = texture2D(u_image, gl_PointCoord);
     }
 </script>
 

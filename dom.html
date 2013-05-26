@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<script type="text/javascript" src="dat.gui.min.js"></script>
+<script type="text/javascript" src="fpsmeter.min.js"></script>
+<style type="text/css">
+    body {
+        background: #333;
+    }
+    img {
+        width: 20px;
+        height: 20px;
+        position: relative;
+    }
+    .viewport {
+        background: #FFFFFF;
+        border: 1px solid black;
+        margin: auto;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        overflow: hidden;
+    }
+</style>
+
+<script type="text/javascript">
+    // requestAnimationFrame polyfill
+    window.requestAnimFrame =
+    window.requestAnimationFrame       ||
+    window.webkitRequestAnimationFrame ||
+    window.mozRequestAnimationFrame    ||
+    window.oRequestAnimationFrame      ||
+    window.msRequestAnimationFrame     ||
+    function(callback) {
+        window.setTimeout(callback, 1000 / 60);
+    };
+
+    var TRANSFORM = (function () {
+        var browser = window.navigator.userAgent.toLowerCase().match(/chrome|firefox|opera|msie|safari/)[0];
+        if (browser === 'chrome' || browser === 'opera') {
+            return '-webkit-transform';
+        } else if (browser === 'firefox') {
+            return '-moz-transform';
+        } else if (browser === 'opera') {
+            return '-o-transform';
+        } else if (browser === 'msie') {
+            return '-ms-transform';
+        } else {
+            return 'transform'
+        }
+    })();
+
+    var DOWN_ARROW = 40;
+    var PARTICLE_INCREMENT = 25;
+    var PARTICLE_HEIGHT = 20;
+    var PARTICLE_SPEED = 200;
+    var PARTICLE_WIDTH = 20;
+    var TOTAL_PARTICLES = 200;
+    var UP_ARROW = 38;
+    var VIEWPORT_WIDTH;
+    var VIEWPORT_HEIGHT;
+
+    var particles = [];
+    var image;
+    var imageSrc = 'media/particle.png';
+
+    var countDiv;
+    var fps;
+    var globalTime = Date.now();
+    var tick = 1 / 60;
+    var viewport;
+
+    window.onload = init;
+
+    function Particle (image, x, y, width, height) {
+        this.image = image.cloneNode();
+        viewport.appendChild(this.image);
+        this.pos = {
+            x: x,
+            y: y
+        };
+        this.vel = {
+            x: Math.random() * PARTICLE_SPEED - PARTICLE_SPEED / 2,
+            y: Math.random() * PARTICLE_SPEED - PARTICLE_SPEED / 2
+        };
+        this.height = height;
+        this.width = width;
+    }
+
+    function init () {
+        image = document.createElement('img');
+        image.onload = main;
+        image.src = imageSrc;
+
+        fps = new FPSMeter(document.body, { theme: 'dark', heat: 1, graph: 1 });
+
+        var gui = new dat.GUI();
+        gui.add(window, 'TOTAL_PARTICLES', 0, 5000);
+
+        viewport = document.getElementsByClassName('viewport')[0];
+        VIEWPORT_WIDTH = window.innerHeight;
+        VIEWPORT_HEIGHT = window.innerHeight;
+        viewport.style.width = VIEWPORT_WIDTH + 'px';
+        viewport.style.height = VIEWPORT_HEIGHT + 'px';
+        viewport.style[TRANSFORM] = getTranslation(window.innerWidth / 2 - VIEWPORT_WIDTH / 2, 0);
+    }
+
+    function main () {
+        spawnParticles(TOTAL_PARTICLES);
+        step();
+    }
+
+    function checkParticleCount () {
+        if (particles.length < TOTAL_PARTICLES) {
+            spawnParticles(~~TOTAL_PARTICLES - particles.length);
+        } else if (particles.length > TOTAL_PARTICLES) {
+            for (var i = particles.length; i > TOTAL_PARTICLES; i--) {
+                kill(particles.pop());
+            }
+        }
+    }
+
+    function getTranslation (particle) {
+        return 'translate3d(' + ~~particle.pos.x + 'px, ' +
+                                ~~particle.pos.y + 'px, 0px)';
+    }
+
+    function kill (particle) {
+        viewport.removeChild(particle.image);
+        particle.image.src = '';
+    }
+
+    function render (particle) {
+        particle.image.style[TRANSFORM] = getTranslation(particle);
+    }
+    function spawnParticles (count) {
+        for (var i = 0; i < count; i++) {
+            var particle = new Particle(
+                image,
+                Math.random() * (VIEWPORT_WIDTH - PARTICLE_WIDTH),
+                Math.random() * (VIEWPORT_HEIGHT - PARTICLE_HEIGHT),
+                PARTICLE_WIDTH,
+                PARTICLE_HEIGHT
+            );
+            render(particle);
+            particles.push(particle);
+        }
+    }
+
+    function step () {
+        var current = Date.now();
+        tick = (current - globalTime) / 1000;
+        globalTime = current;
+
+        for (var i = 0, len = particles.length; i < len; i++) {
+            var particle = particles[i];
+            update(particle);
+            render(particle);
+        }
+
+        fps.tick();
+
+        requestAnimFrame(step);
+    }
+
+    function update (particle) {
+        particle.pos.x += particle.vel.x * tick;
+        particle.pos.y += particle.vel.y * tick;
+
+        if (particle.pos.x < 0 || particle.pos.x + particle.width > VIEWPORT_WIDTH) {
+            particle.vel.x = -particle.vel.x;
+        }
+
+        if (particle.pos.y < 0 || particle.pos.y + particle.height > VIEWPORT_HEIGHT) {
+            particle.vel.y = -particle.vel.y;
+        }
+    }
+
+</script>
+
+<body>
+    <div class="viewport"></div>
+</body>
+
+</html>
