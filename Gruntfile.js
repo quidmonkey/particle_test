@@ -4,6 +4,7 @@ module.exports = function(grunt) {
   var shell = require('shelljs');
 
   grunt.initConfig({
+    dpy: grunt.file.readJSON('deploy.json'),
     pkg: grunt.file.readJSON('package.json'),
     shell: {
       // bake impact game
@@ -19,7 +20,7 @@ module.exports = function(grunt) {
       },
       // deploy to a remote server
       deploy: {
-        command: 'rsync -avz --exclude-from "<%= pkg.excludesFile %>" $PWD <%= pkg.deployUser %>@<%= pkg.deployServer %>:<%= pkg.deployDir %>',
+        command: 'rsync -avz --exclude-from "<%= dpy.excludesFile %>" $PWD <%= dpy.deployUser %>@<%= dpy.deployServer %>:<%= dpy.deployDir %>',
         options: {
           stdout: true
         }

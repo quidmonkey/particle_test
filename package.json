@@ -1,9 +1,5 @@
 {
   "name": "particles",
-  "deployServer": "ninjaspankypants.com",
-  "deployUser": "quidmonkey",
-  "deployDir": "ninjaspankypants.com",
-  "excludesFile": "excludes",
   "htmlFiles": [
     "impact.html",
     "impact-fast.html"

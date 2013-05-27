@@ -10,3 +10,4 @@ README.md
 excludes
 .DS_Store
 debug-webgl.js
+deploy.json

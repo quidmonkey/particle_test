@@ -9,3 +9,4 @@ Makefile
 node_modules
 node_modules/*
 webgl-debug.js
+deploy.json
