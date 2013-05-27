@@ -334,13 +334,14 @@
     }
 
     // extrapolate position over time
+    // clamp to canvas size
     float extrapolate (float delta, float max) {
         float bounces = floor(delta / max);
         // how many bounces?
         if (mod(bounces, 2.0) == 1.0) {
-            return max - mod(delta, max);
+            return max - mod(delta, max);   // odd bounces - going the opposite direction
         } else {
-            return mod(delta, max);
+            return mod(delta, max);         // even bounces - going starting direction
         }
     }
 

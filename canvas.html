@@ -3,7 +3,11 @@
 
 <head>
 <style type="text/css">
+    body {
+        background: #333;
+    }
     #canvas {
+        background: #FFFFFF;
         border: 1px solid black;
         margin: auto;
         position: absolute;
@@ -35,13 +39,11 @@
     var canvas;
     var ctx;
 
-    var particles = [];
+    var fps;
+    var globalTime = Date.now();
     var image;
     var imageSrc = 'media/particle.png';
-
-    var fps;
-
-    var globalTime = Date.now();
+    var particles = [];
     var tick;
 
     window.onload = init;
@@ -68,7 +70,7 @@
         fps = new FPSMeter(document.body, { theme: 'dark', heat: 1, graph: 1 });
 
         var gui = new dat.GUI();
-        gui.add(window, 'TOTAL_PARTICLES', 0, 20000);
+        gui.add(window, 'TOTAL_PARTICLES', 0, 25000);
     }
 
     function main () {
@@ -112,6 +114,10 @@
         canvas.style.height = ~~newHeight + 'px';
     }
 
+    function render (particle) {
+        ctx.drawImage(particle.image, ~~particle.pos.x, ~~particle.pos.y);
+    }
+
     function spawnParticles (count) {
         for (var i = 0; i < count; i++) {
             particles.push(new Particle(
@@ -142,10 +148,6 @@
         }
 
         fps.tick();
-    }
-
-    function render (particle) {
-        ctx.drawImage(particle.image, ~~particle.pos.x, ~~particle.pos.y);
     }
 
     function update (particle) {

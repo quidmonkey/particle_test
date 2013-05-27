@@ -10,9 +10,9 @@
         background: #333;
     }
     img {
-        width: 20px;
-        height: 20px;
-        position: relative;
+        /*height: 20px;*/
+        position: absolute;
+        /*width: 20px;*/
     }
     .viewport {
         background: #FFFFFF;
@@ -56,21 +56,22 @@
 
     var DOWN_ARROW = 40;
     var PARTICLE_INCREMENT = 25;
-    var PARTICLE_HEIGHT = 20;
+    var PARTICLE_HEIGHT;
     var PARTICLE_SPEED = 200;
-    var PARTICLE_WIDTH = 20;
+    var PARTICLE_WIDTH;
+    var TARGET_VIEWPORT_HEIGHT = 500;
+    var TARGET_VIEWPORT_WIDTH = 500;
     var TOTAL_PARTICLES = 200;
     var UP_ARROW = 38;
     var VIEWPORT_WIDTH;
     var VIEWPORT_HEIGHT;
 
-    var particles = [];
-    var image;
-    var imageSrc = 'media/particle.png';
-
     var countDiv;
     var fps;
     var globalTime = Date.now();
+    var image;
+    var imageSrc = 'media/particle.png';
+    var particles = [];
     var tick = 1 / 60;
     var viewport;
 
@@ -101,15 +102,25 @@
         var gui = new dat.GUI();
         gui.add(window, 'TOTAL_PARTICLES', 0, 5000);
 
+        // determine viewport scaling to fill browser and preserve aspect ratio
         viewport = document.getElementsByClassName('viewport')[0];
         VIEWPORT_WIDTH = window.innerHeight;
         VIEWPORT_HEIGHT = window.innerHeight;
+
+        // apply style and center viewport
         viewport.style.width = VIEWPORT_WIDTH + 'px';
         viewport.style.height = VIEWPORT_HEIGHT + 'px';
-        viewport.style[TRANSFORM] = getTranslation(window.innerWidth / 2 - VIEWPORT_WIDTH / 2, 0);
     }
 
     function main () {
+        // determine image scaling that preserves aspect ratio
+        PARTICLE_WIDTH = Math.round(image.width * VIEWPORT_WIDTH / TARGET_VIEWPORT_WIDTH);
+        PARTICLE_HEIGHT = Math.round(image.height * VIEWPORT_HEIGHT / TARGET_VIEWPORT_HEIGHT);
+
+        // apply style
+        image.style.width = PARTICLE_WIDTH + 'px';
+        image.style.height = PARTICLE_HEIGHT + 'px';
+
         spawnParticles(TOTAL_PARTICLES);
         step();
     }
@@ -155,6 +166,8 @@
         var current = Date.now();
         tick = (current - globalTime) / 1000;
         globalTime = current;
+
+         checkParticleCount(~~TOTAL_PARTICLES);
 
         for (var i = 0, len = particles.length; i < len; i++) {
             var particle = particles[i];
