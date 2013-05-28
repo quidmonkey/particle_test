@@ -52,7 +52,6 @@ module.exports = function(grunt) {
   grunt.registerTask('cocoon', ['shell:cocoon']);
   grunt.registerTask('deploy', ['shell:deploy']);
   grunt.registerTask('expose', ['shell:expose']);
-  grunt.registerTask('uglify', ['uglify']);
 
   // tasks built from other tasks
   grunt.registerTask('prepare', 'bake and inject minified script', function () {
