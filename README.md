@@ -1,18 +1,25 @@
-## ImpactJS vs. Canvas vs. WebGL vs. PixiJS Particle Test
+## Canvas vs. DOM vs. WebGL vs. ImpactJS vs. PixiJS Particle Test
 
 This is a particle-based performance test comparing the [ImpactJS](http://impactjs.com/) game engine, 2D Canvas, WebGL and [PixiJS](https://github.com/GoodBoyDigital/pixi.js).
 
-The test features 5 HTML files:
+The test features 8 HTML files:
 
+- canvas.html - 2D Canvas Test - [Live Example](http://ninjaspankypants.com/particle_test/canvas.html)
+- dom.html - DOM Test - [Live Example](http://ninjaspankypants.com/particle_test/dom.html)
 - impact.html - ImpactJS Test - [Live Example](http://ninjaspankypants.com/particle_test/impact.html)
 - impact-fast.html - ImpactJS Test Using a Faster Implementation - [Live Example](http://ninjaspankypants.com/particle_test/impact-fast.html)
-- canvas.html - 2D Canvas Test - [Live Example](http://ninjaspankypants.com/particle_test/canvas.html)
-- webgl.html - WebGL Test - [Live Example](http://ninjaspankypants.com/particle_test/webgl.html)
 - pixi.html - PixiJS Test - [Live Example](http://ninjaspankypants.com/particle_test/pixi.html)
+- webgl.html - WebGL Test #1 (interleaved) - [Live Example](http://ninjaspankypants.com/particle_test/webgl.html)
+- webgl.v2.html - WebGL Test #2 (gl.POINTS) - [Live Example](http://ninjaspankypants.com/particle_test/webgl.v2.html)
+- webgl.v3.html - WebGL Test #3 (GPU Parallelism) - [Live Example](http://ninjaspankypants.com/particle_test/webgl.v3.html)
 
 Both the ImpactJS tests require a copy of the ImpactJS game engine. The Canvas and WebGL tests are standalone files.
 
 It is recommended that you adjust the slider in the upper right-hand corner until you reach 30 FPS and compare particle counts among the tests.
+
+## DOM
+
+A DOM test is included as a base for benchmarking. It should be clear that of all tests, this is the slowest. Recent developments in web technology have allowed canvas rendering to far outstrip the DOM, and any web application which requires more than a few hundred elements onscreen simultaneously should forgo the DOM in favor of Canvas. Unfortunately, it is hard to get a proper 1-to-1 comparison between DOM and Canvas due to the differences in styling: where scaling a canvas can be achieve by styling its width and height (and by extension, any image drawn within it), the DOM requires styling to be defined for each element; thus, the browser needs to interpolate each img tag vs. a single canvas tag to achieve the same effect.
 
 ## ImpactJS
 
@@ -29,6 +36,10 @@ Special thanks to [Amadeus Demarzi](https://github.com/amadeus) for his help wit
 ## PixiJS
 
 While PixiJS can't match a native WebGL implementation, it does quite well. Unfortunately, it appears PixiJS implements a great deal of pre-processing in order to properly batch GL calls. Be aware that manipulating the particle count will incur some downtime while Pixi preps for batching.
+
+## WebGL
+
+Three native WebGL tests are included. The first uses an interleaving technique to pass data to WebGL via a vertex buffer object (VBO). Both vertex and fragment shader are passed, with each quad weighing in at a hefty 30 floats. The second test passes vertices as gl.POINTS vs. gl.TRIANGLES, and uses the pre-defined gl_PointSize and gl_PointCoord to interpolate fragment data. Overall, this results in ~4-5 fps or an 8% performance increase. The third and final test passes a gl.POINTS VBO during initialization and only passes a single float each frame (delta time), allowing the particles to run entirely on the GPU, unhindered by Javascript. This results in massive performance gains.
 
 ## Errata
 
