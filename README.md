@@ -4,14 +4,14 @@ This is a particle-based performance test comparing the [ImpactJS](http://impact
 
 The test features 8 HTML files:
 
-- canvas.html - 2D Canvas Test - [Live Example](http://ninjaspankypants.com/particle_test/canvas.html)
-- dom.html - DOM Test - [Live Example](http://ninjaspankypants.com/particle_test/dom.html)
-- impact.html - ImpactJS Test - [Live Example](http://ninjaspankypants.com/particle_test/impact.html)
-- impact-fast.html - ImpactJS Test Using a Faster Implementation - [Live Example](http://ninjaspankypants.com/particle_test/impact-fast.html)
-- pixi.html - PixiJS Test - [Live Example](http://ninjaspankypants.com/particle_test/pixi.html)
-- webgl.html - WebGL Test #1 (interleaved) - [Live Example](http://ninjaspankypants.com/particle_test/webgl.html)
-- webgl.v2.html - WebGL Test #2 (gl.POINTS) - [Live Example](http://ninjaspankypants.com/particle_test/webgl.v2.html)
-- webgl.v3.html - WebGL Test #3 (GPU Parallelism) - [Live Example](http://ninjaspankypants.com/particle_test/webgl.v3.html)
+- canvas.html - 2D Canvas Test
+- dom.html - DOM Test
+- impact.html - ImpactJS Test
+- impact-fast.html - ImpactJS Test Using a Faster Implementation
+- pixi.html - PixiJS Test
+- webgl.html - WebGL Test #1 (interleaved)
+- webgl.v2.html - WebGL Test #2 (gl.POINTS)
+- webgl.v3.html - WebGL Test #3 (GPU Parallelism) - [Live Example](http://quidmonkey.github.io/particle_test/)
 
 Both the ImpactJS tests require a copy of the ImpactJS game engine. The Canvas and WebGL tests are standalone files.
 
